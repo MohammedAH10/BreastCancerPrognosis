@@ -1,0 +1,7 @@
+Flask==3.0.3
+python-dotenv==1.0.0
+tensorflow==2.20.0
+Pillow==10.4.0
+gunicorn==21.2.0
+supabase==1.0.3
+python-multipart==0.0.6

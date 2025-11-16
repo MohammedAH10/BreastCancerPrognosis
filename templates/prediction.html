@@ -1,0 +1,151 @@
+{% extends "base.html" %}
+
+{% block title %}Image Analysis - Breast Cancer AI Assistant{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gray-50 py-8">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+        <!-- Progress Steps -->
+        <div class="mb-8">
+            <div class="flex items-center justify-center">
+                <div class="flex items-center">
+                    <div class="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center">
+                        <i class="fas fa-upload text-white"></i>
+                    </div>
+                    <div class="ml-2 text-sm font-medium text-blue-600">Upload Image</div>
+                </div>
+                <div class="w-24 h-1 bg-gray-300 mx-4"></div>
+                <div class="flex items-center">
+                    <div class="w-10 h-10 bg-gray-300 rounded-full flex items-center justify-center">
+                        <i class="fas fa-clipboard-list text-gray-500"></i>
+                    </div>
+                    <div class="ml-2 text-sm font-medium text-gray-500">Questionnaire</div>
+                </div>
+                <div class="w-24 h-1 bg-gray-300 mx-4"></div>
+                <div class="flex items-center">
+                    <div class="w-10 h-10 bg-gray-300 rounded-full flex items-center justify-center">
+                        <i class="fas fa-chart-line text-gray-500"></i>
+                    </div>
+                    <div class="ml-2 text-sm font-medium text-gray-500">Insights</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Card -->
+        <div class="bg-white rounded-2xl shadow-sm p-8">
+            <div class="text-center mb-8">
+                <h1 class="text-3xl font-bold text-gray-900 mb-2">Upload Medical Image</h1>
+                <p class="text-gray-600">Upload a breast medical image for AI analysis</p>
+            </div>
+
+            {% if error %}
+            <div class="mb-6 bg-red-50 border border-red-200 rounded-lg p-4">
+                <div class="flex items-center">
+                    <i class="fas fa-exclamation-triangle text-red-500 mr-3"></i>
+                    <p class="text-red-700">{{ error }}</p>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Upload Form -->
+            <form method="POST" enctype="multipart/form-data" class="space-y-6">
+                <div class="border-2 border-dashed border-gray-300 rounded-2xl p-8 text-center hover:border-blue-400 transition duration-300">
+                    <i class="fas fa-cloud-upload-alt text-4xl text-gray-400 mb-4"></i>
+                    <h3 class="text-lg font-medium text-gray-900 mb-2">Drag and drop your image here</h3>
+                    <p class="text-gray-500 mb-4">or click to select from your device</p>
+                    
+                    <input type="file" name="image" id="image" accept=".png,.jpg,.jpeg,.bmp" 
+                           class="hidden" required>
+                    <label for="image" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-semibold cursor-pointer inline-block transition duration-300">
+                        <i class="fas fa-folder-open mr-2"></i>Choose File
+                    </label>
+                    
+                    <p class="text-sm text-gray-500 mt-4">Supported formats: PNG, JPG, JPEG, BMP • Max size: 16MB</p>
+                </div>
+
+                <!-- Selected File Preview -->
+                <div id="file-preview" class="hidden">
+                    <div class="bg-gray-50 rounded-lg p-4">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center">
+                                <i class="fas fa-file-image text-blue-500 text-xl mr-3"></i>
+                                <div>
+                                    <p id="file-name" class="font-medium text-gray-900"></p>
+                                    <p id="file-size" class="text-sm text-gray-500"></p>
+                                </div>
+                            </div>
+                            <button type="button" onclick="clearFile()" class="text-gray-400 hover:text-gray-600">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Submit Button -->
+                <button type="submit" id="submit-btn" 
+                        class="w-full bg-blue-600 hover:bg-blue-700 text-white py-4 rounded-lg font-semibold text-lg transition duration-300 disabled:bg-gray-400 disabled:cursor-not-allowed">
+                    <i class="fas fa-search mr-2"></i>Analyze Image
+                </button>
+            </form>
+
+            <!-- Info Cards -->
+            <div class="grid md:grid-cols-2 gap-6 mt-12">
+                <div class="bg-blue-50 rounded-xl p-6">
+                    <div class="flex items-start">
+                        <i class="fas fa-shield-alt text-blue-500 text-xl mt-1 mr-4"></i>
+                        <div>
+                            <h3 class="font-semibold text-gray-900 mb-2">Privacy & Security</h3>
+                            <p class="text-sm text-gray-600">Your medical images are processed securely and are not stored permanently.</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="bg-green-50 rounded-xl p-6">
+                    <div class="flex items-start">
+                        <i class="fas fa-robot text-green-500 text-xl mt-1 mr-4"></i>
+                        <div>
+                            <h3 class="font-semibold text-gray-900 mb-2">AI-Powered Analysis</h3>
+                            <p class="text-sm text-gray-600">Our deep learning model provides accurate classification based on thousands of training images.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.getElementById('image').addEventListener('change', function(e) {
+    const file = e.target.files[0];
+    const preview = document.getElementById('file-preview');
+    const fileName = document.getElementById('file-name');
+    const fileSize = document.getElementById('file-size');
+    const submitBtn = document.getElementById('submit-btn');
+    
+    if (file) {
+        // Show preview
+        fileName.textContent = file.name;
+        fileSize.textContent = formatFileSize(file.size);
+        preview.classList.remove('hidden');
+        submitBtn.disabled = false;
+    } else {
+        preview.classList.add('hidden');
+        submitBtn.disabled = true;
+    }
+});
+
+function clearFile() {
+    document.getElementById('image').value = '';
+    document.getElementById('file-preview').classList.add('hidden');
+    document.getElementById('submit-btn').disabled = true;
+}
+
+function formatFileSize(bytes) {
+    if (bytes === 0) return '0 Bytes';
+    const k = 1024;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+}
+</script>
+{% endblock %}

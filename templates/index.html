@@ -1,0 +1,110 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 py-12">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+        <!-- Hero Section -->
+        <div class="text-center mb-16">
+            <div class="mb-8">
+                <i class="fas fa-stethoscope text-6xl text-blue-600 mb-4"></i>
+                <h1 class="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
+                    AI-Powered Breast Cancer Assessment
+                </h1>
+                <p class="text-xl text-gray-600 max-w-2xl mx-auto">
+                    Advanced image analysis combined with clinical insights for comprehensive breast health assessment
+                </p>
+            </div>
+            
+            <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                <a href="{{ url_for('predict') }}" 
+                    class="bg-blue-600 hover:bg-blue-700 text-white px-8 py-4 rounded-lg font-semibold text-lg transition duration-300 transform hover:scale-105">
+                    <i class="fas fa-play mr-2"></i>Start New Analysis
+                </a>
+                <button class="border-2 border-blue-600 text-blue-600 hover:bg-blue-50 px-8 py-4 rounded-lg font-semibold text-lg transition duration-300">
+                    <i class="fas fa-book mr-2"></i>Learn More
+                </button>
+            </div>
+        </div>
+
+        <!-- Features Grid -->
+        <div class="grid md:grid-cols-3 gap-8 mb-16">
+            <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100 text-center">
+                <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mx-auto mb-4">
+                    <i class="fas fa-brain text-blue-600 text-xl"></i>
+                </div>
+                <h3 class="text-lg font-semibold text-gray-900 mb-2">AI Image Analysis</h3>
+                <p class="text-gray-600">Deep learning model trained on thousands of medical images for accurate classification</p>
+            </div>
+            
+            <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100 text-center">
+                <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mx-auto mb-4">
+                    <i class="fas fa-clipboard-list text-green-600 text-xl"></i>
+                </div>
+                <h3 class="text-lg font-semibold text-gray-900 mb-2">Clinical Assessment</h3>
+                <p class="text-gray-600">Personalized questionnaire based on prediction results for comprehensive evaluation</p>
+            </div>
+            
+            <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100 text-center">
+                <div class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center mx-auto mb-4">
+                    <i class="fas fa-chart-line text-purple-600 text-xl"></i>
+                </div>
+                <h3 class="text-lg font-semibold text-gray-900 mb-2">Personalized Insights</h3>
+                <p class="text-gray-600">Evidence-based recommendations and follow-up plans tailored to your specific case</p>
+            </div>
+        </div>
+
+        <!-- How It Works -->
+        <div class="bg-white rounded-2xl shadow-sm p-8 mb-12">
+            <h2 class="text-3xl font-bold text-center text-gray-900 mb-8">How It Works</h2>
+            
+            <div class="grid md:grid-cols-4 gap-6">
+                <div class="text-center">
+                    <div class="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <span class="text-blue-600 font-bold text-xl">1</span>
+                    </div>
+                    <h3 class="font-semibold text-gray-900 mb-2">Upload Image</h3>
+                    <p class="text-sm text-gray-600">Upload your breast medical image (mammogram, ultrasound)</p>
+                </div>
+                
+                <div class="text-center">
+                    <div class="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <span class="text-blue-600 font-bold text-xl">2</span>
+                    </div>
+                    <h3 class="font-semibold text-gray-900 mb-2">AI Analysis</h3>
+                    <p class="text-sm text-gray-600">Our AI model analyzes the image and provides initial assessment</p>
+                </div>
+                
+                <div class="text-center">
+                    <div class="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <span class="text-blue-600 font-bold text-xl">3</span>
+                    </div>
+                    <h3 class="font-semibold text-gray-900 mb-2">Questionnaire</h3>
+                    <p class="text-sm text-gray-600">Complete a brief clinical questionnaire based on the prediction</p>
+                </div>
+                
+                <div class="text-center">
+                    <div class="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <span class="text-blue-600 font-bold text-xl">4</span>
+                    </div>
+                    <h3 class="font-semibold text-gray-900 mb-2">Get Insights</h3>
+                    <p class="text-sm text-gray-600">Receive personalized insights and recommendations</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- CTA Section -->
+        <div class="text-center">
+            <div class="bg-blue-600 rounded-2xl p-8 text-white">
+                <h2 class="text-2xl font-bold mb-4">Ready to Get Started?</h2>
+                <p class="text-blue-100 mb-6 max-w-md mx-auto">
+                    Upload your medical image and get AI-powered insights in minutes
+                </p>
+                <a href="{{ url_for('predict') }}" 
+                    class="bg-white text-blue-600 hover:bg-blue-50 px-8 py-3 rounded-lg font-semibold text-lg inline-block transition duration-300 transform hover:scale-105">
+                    <i class="fas fa-upload mr-2"></i>Upload Image Now
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,197 @@
+{% extends "base.html" %}
+
+{% block title %}Clinical Assessment - Breast Cancer AI Assistant{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gray-50 py-8">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+        <!-- Progress Steps -->
+        <div class="mb-8">
+            <div class="flex items-center justify-center">
+                <div class="flex items-center">
+                    <div class="w-10 h-10 bg-green-500 rounded-full flex items-center justify-center">
+                        <i class="fas fa-check text-white"></i>
+                    </div>
+                    <div class="ml-2 text-sm font-medium text-green-600">Upload Image</div>
+                </div>
+                <div class="w-24 h-1 bg-green-500 mx-4"></div>
+                <div class="flex items-center">
+                    <div class="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center">
+                        <i class="fas fa-clipboard-list text-white"></i>
+                    </div>
+                    <div class="ml-2 text-sm font-medium text-blue-600">Questionnaire</div>
+                </div>
+                <div class="w-24 h-1 bg-gray-300 mx-4"></div>
+                <div class="flex items-center">
+                    <div class="w-10 h-10 bg-gray-300 rounded-full flex items-center justify-center">
+                        <i class="fas fa-chart-line text-gray-500"></i>
+                    </div>
+                    <div class="ml-2 text-sm font-medium text-gray-500">Insights</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Card -->
+        <div class="bg-white rounded-2xl shadow-sm p-8">
+            <!-- Prediction Result Banner -->
+            <div class="mb-8 p-6 rounded-xl {% if prediction.result == 'benign' %}bg-green-50 border border-green-200{% else %}bg-orange-50 border border-orange-200{% endif %}">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center">
+                        <div class="w-12 h-12 {% if prediction.result == 'benign' %}bg-green-100 text-green-600{% else %}bg-orange-100 text-orange-600{% endif %} rounded-full flex items-center justify-center mr-4">
+                            <i class="fas fa-{% if prediction.result == 'benign' %}check{% else %}exclamation-triangle{% endif %} text-xl"></i>
+                        </div>
+                        <div>
+                            <h2 class="text-xl font-bold text-gray-900">
+                                {{ prediction.result.upper() }} - {{ "%.1f"|format(prediction.confidence * 100) }}% Confidence
+                            </h2>
+                            <p class="text-gray-600">Please provide detailed information for accurate assessment</p>
+                        </div>
+                    </div>
+                    <span class="{% if prediction.result == 'benign' %}bg-green-100 text-green-800{% else %}bg-orange-100 text-orange-800{% endif %} px-3 py-1 rounded-full text-sm font-medium">
+                        {{ prediction_type.upper() }} ASSESSMENT
+                    </span>
+                </div>
+            </div>
+
+            <!-- Questionnaire Form -->
+            <form method="POST">
+                <div class="mb-8">
+                    <h1 class="text-3xl font-bold text-gray-900 mb-2">{{ questionnaire.title }}</h1>
+                    <p class="text-gray-600">Please provide comprehensive information for accurate survival prediction and treatment recommendations</p>
+                </div>
+
+                {% for section_name, section in questionnaire.sections.items() %}
+                <div class="mb-8 p-6 bg-gray-50 rounded-xl">
+                    <h3 class="text-xl font-semibold text-gray-900 mb-4 flex items-center">
+                        <i class="fas fa-{% if section_name == 'demographics' %}user{% elif section_name == 'clinical_details' %}stethoscope{% elif section_name == 'biomarkers' %}flask{% elif section_name == 'treatment_history' %}pills{% else %}heartbeat{% endif %} text-blue-500 mr-3"></i>
+                        {{ section.title }}
+                    </h3>
+                    
+                    <div class="space-y-6">
+                        {% for question_name, question_data in section.questions.items() %}
+                        <div class="bg-white p-4 rounded-lg border border-gray-200">
+                            <label class="block text-sm font-medium text-gray-700 mb-3">
+                                {{ question_data.question }}
+                                {% if question_data.required %}
+                                <span class="text-red-500">*</span>
+                                {% endif %}
+                            </label>
+                            
+                            {% if question_data.type == 'select' %}
+                            <select name="{{ question_name }}" 
+                                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                    {% if question_data.required %}required{% endif %}>
+                                <option value="">Please select...</option>
+                                {% for option in question_data.options %}
+                                <option value="{{ option }}">{{ option }}</option>
+                                {% endfor %}
+                            </select>
+                            
+                            {% elif question_data.type == 'radio' %}
+                            <div class="space-y-2">
+                                {% for option in question_data.options %}
+                                <label class="flex items-center">
+                                    <input type="radio" name="{{ question_name }}" value="{{ option }}" 
+                                            class="mr-3 text-blue-600 focus:ring-blue-500"
+                                            {% if question_data.required %}required{% endif %}>
+                                    <span class="text-gray-700">{{ option }}</span>
+                                </label>
+                                {% endfor %}
+                            </div>
+                            {% endif %}
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endfor %}
+
+                <!-- Form Actions -->
+                <div class="flex flex-col sm:flex-row gap-4 pt-6 border-t border-gray-200">
+                    <a href="{{ url_for('predict') }}" 
+                        class="flex-1 bg-gray-500 hover:bg-gray-600 text-white py-3 px-6 rounded-lg font-semibold text-center transition duration-300">
+                        <i class="fas fa-arrow-left mr-2"></i>Back to Upload
+                    </a>
+                    <button type="submit" 
+                            class="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-3 px-6 rounded-lg font-semibold transition duration-300 transform hover:scale-105">
+                        Generate Insights <i class="fas fa-arrow-right ml-2"></i>
+                    </button>
+                </div>
+            </form>
+
+            <!-- Information Notice -->
+            <div class="mt-8 bg-blue-50 border border-blue-200 rounded-xl p-6">
+                <div class="flex items-start">
+                    <i class="fas fa-info-circle text-blue-500 text-xl mt-1 mr-4"></i>
+                    <div>
+                        <h3 class="font-semibold text-blue-800 mb-2">Why We Need This Information</h3>
+                        <p class="text-blue-700 text-sm">
+                            The detailed information you provide helps our AI model generate accurate survival predictions 
+                            and personalized treatment recommendations based on thousands of clinical cases. 
+                            This comprehensive assessment considers your specific cancer characteristics, 
+                            treatment history, and overall health status.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- JavaScript for better user experience -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Add smooth scrolling to form sections
+    const formSections = document.querySelectorAll('.bg-gray-50.rounded-xl');
+    
+    formSections.forEach((section, index) => {
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('animate-fade-in');
+                }
+            });
+        }, { threshold: 0.1 });
+        
+        observer.observe(section);
+    });
+
+    // Add form validation
+    const form = document.querySelector('form');
+    form.addEventListener('submit', function(e) {
+        const requiredFields = form.querySelectorAll('[required]');
+        let isValid = true;
+        
+        requiredFields.forEach(field => {
+            if (!field.value) {
+                isValid = false;
+                field.classList.add('border-red-500');
+            } else {
+                field.classList.remove('border-red-500');
+            }
+        });
+        
+        if (!isValid) {
+            e.preventDefault();
+            alert('Please fill in all required fields marked with *');
+        }
+    });
+});
+</script>
+
+<style>
+.animate-fade-in {
+    animation: fadeIn 0.6s ease-in-out;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+</style>
+{% endblock %}

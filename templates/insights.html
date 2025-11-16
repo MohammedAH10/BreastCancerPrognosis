@@ -1,0 +1,320 @@
+{% extends "base.html" %}
+
+{% block title %}Your Insights - Breast Cancer AI Assistant{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gray-50 py-8">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+        <!-- Progress Steps -->
+        <div class="mb-8">
+            <div class="flex items-center justify-center">
+                <div class="flex items-center">
+                    <div class="w-10 h-10 bg-green-500 rounded-full flex items-center justify-center">
+                        <i class="fas fa-check text-white"></i>
+                    </div>
+                    <div class="ml-2 text-sm font-medium text-green-600">Upload Image</div>
+                </div>
+                <div class="w-24 h-1 bg-green-500 mx-4"></div>
+                <div class="flex items-center">
+                    <div class="w-10 h-10 bg-green-500 rounded-full flex items-center justify-center">
+                        <i class="fas fa-check text-white"></i>
+                    </div>
+                    <div class="ml-2 text-sm font-medium text-green-600">Questionnaire</div>
+                </div>
+                <div class="w-24 h-1 bg-green-500 mx-4"></div>
+                <div class="flex items-center">
+                    <div class="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center">
+                        <i class="fas fa-chart-line text-white"></i>
+                    </div>
+                    <div class="ml-2 text-sm font-medium text-blue-600">Insights</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Summary Card -->
+        <div class="bg-white rounded-2xl shadow-sm p-8 mb-8">
+            <div class="flex flex-col lg:flex-row items-center justify-between">
+                <div class="flex items-center mb-4 lg:mb-0">
+                    <div class="w-16 h-16 {% if prediction.result == 'benign' %}bg-green-100 text-green-600{% else %}bg-orange-100 text-orange-600{% endif %} rounded-full flex items-center justify-center mr-4">
+                        <i class="fas fa-{% if prediction.result == 'benign' %}check{% else %}exclamation-triangle{% endif %} text-2xl"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-3xl font-bold text-gray-900">
+                            {{ prediction.result.upper() }} Assessment
+                        </h1>
+                        <p class="text-gray-600">{{ "%.1f"|format(prediction.confidence * 100) }}% confidence</p>
+                    </div>
+                </div>
+                <div class="flex gap-4">
+                    <a href="{{ url_for('new_analysis') }}" 
+                        class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-semibold transition duration-300">
+                        <i class="fas fa-redo mr-2"></i>New Analysis
+                    </a>
+                    <button onclick="window.print()" 
+                            class="bg-gray-500 hover:bg-gray-600 text-white px-6 py-3 rounded-lg font-semibold transition duration-300">
+                        <i class="fas fa-print mr-2"></i>Print Report
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Insights Grid -->
+        <div class="grid lg:grid-cols-2 gap-8">
+            <!-- Left Column -->
+            <div class="space-y-6">
+                {% if insights.type == 'benign' %}
+                <!-- Risk Assessment -->
+                <div class="bg-white rounded-xl shadow-sm p-6 border-l-4 border-{{ insights.risk_assessment.risk_color }}-500">
+                    <h2 class="text-xl font-bold text-gray-900 mb-4 flex items-center">
+                        <i class="fas fa-shield-alt text-{{ insights.risk_assessment.risk_color }}-500 mr-3"></i>
+                        Risk Assessment
+                    </h2>
+                    
+                    <div class="space-y-4">
+                        <div class="flex justify-between items-center">
+                            <span class="text-gray-600">Risk Level</span>
+                            <span class="px-3 py-1 bg-{{ insights.risk_assessment.risk_color }}-100 text-{{ insights.risk_assessment.risk_color }}-800 rounded-full font-semibold">
+                                {{ insights.risk_assessment.risk_level }}
+                            </span>
+                        </div>
+                        
+                        <div class="flex justify-between items-center">
+                            <span class="text-gray-600">Risk Score</span>
+                            <span class="font-semibold">{{ insights.risk_assessment.risk_score }}/5</span>
+                        </div>
+                        
+                        <div class="flex justify-between items-center">
+                            <span class="text-gray-600">Image Confidence</span>
+                            <span class="font-semibold">{{ insights.risk_assessment.image_confidence }}</span>
+                        </div>
+                    </div>
+
+                    {% if insights.risk_assessment.risk_factors %}
+                    <div class="mt-4">
+                        <h3 class="font-semibold text-gray-900 mb-2">Identified Risk Factors:</h3>
+                        <ul class="space-y-1">
+                            {% for factor in insights.risk_assessment.risk_factors %}
+                            <li class="flex items-center text-gray-700">
+                                <i class="fas fa-circle text-xs text-{{ insights.risk_assessment.risk_color }}-500 mr-2"></i>
+                                {{ factor }}
+                            </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                    {% endif %}
+                </div>
+
+                <!-- Lifestyle Recommendations -->
+                <div class="bg-white rounded-xl shadow-sm p-6 border-l-4 border-green-500">
+                    <h2 class="text-xl font-bold text-gray-900 mb-4 flex items-center">
+                        <i class="fas fa-heart text-green-500 mr-3"></i>
+                        Lifestyle Recommendations
+                    </h2>
+                    
+                    <ul class="space-y-3">
+                        {% for recommendation in insights.lifestyle_recommendations %}
+                        <li class="flex items-start">
+                            <i class="fas fa-check text-green-500 mt-1 mr-3"></i>
+                            <span class="text-gray-700">{{ recommendation }}</span>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+
+                {% else %}
+                <!-- Clinical Insights -->
+                <div class="bg-white rounded-xl shadow-sm p-6 border-l-4 border-{{ insights.clinical_insights.stage_color }}-500">
+                    <h2 class="text-xl font-bold text-gray-900 mb-4 flex items-center">
+                        <i class="fas fa-stethoscope text-{{ insights.clinical_insights.stage_color }}-500 mr-3"></i>
+                        Clinical Insights
+                    </h2>
+                    
+                    <div class="space-y-4">
+                        <div class="flex justify-between items-center">
+                            <span class="text-gray-600">Stage Estimate</span>
+                            <span class="px-3 py-1 bg-{{ insights.clinical_insights.stage_color }}-100 text-{{ insights.clinical_insights.stage_color }}-800 rounded-full font-semibold">
+                                {{ insights.clinical_insights.stage_estimate }}
+                            </span>
+                        </div>
+                        
+                        <div class="flex justify-between items-center">
+                            <span class="text-gray-600">Image Confidence</span>
+                            <span class="font-semibold">{{ insights.clinical_insights.image_confidence }}</span>
+                        </div>
+                        
+                        <!-- Survival Prediction -->
+                        <div class="flex justify-between items-center">
+                            <span class="text-gray-600">5-Year Survival Prediction</span>
+                            <span class="font-semibold text-blue-600">{{ insights.prognosis_indicators.survival_percentage }}%</span>
+                        </div>
+                        
+                        <div class="flex justify-between items-center">
+                            <span class="text-gray-600">Prediction Confidence</span>
+                            <span class="px-3 py-1 bg-{{ 'green' if insights.prognosis_indicators.survival_confidence == 'high' else 'yellow' if insights.prognosis_indicators.survival_confidence == 'medium' else 'red' }}-100 text-{{ 'green' if insights.prognosis_indicators.survival_confidence == 'high' else 'yellow' if insights.prognosis_indicators.survival_confidence == 'medium' else 'red' }}-800 rounded-full text-sm font-medium">
+                                {{ insights.prognosis_indicators.survival_confidence.upper() }}
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="mt-4">
+                        <h3 class="font-semibold text-gray-900 mb-2">Recommended Diagnostics:</h3>
+                        <ul class="space-y-1">
+                            {% for diagnostic in insights.clinical_insights.next_diagnostics %}
+                            <li class="flex items-center text-gray-700">
+                                <i class="fas fa-arrow-right text-xs text-{{ insights.clinical_insights.stage_color }}-500 mr-2"></i>
+                                {{ diagnostic }}
+                            </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Treatment Recommendations -->
+                <div class="bg-white rounded-xl shadow-sm p-6 border-l-4 border-blue-500">
+                    <h2 class="text-xl font-bold text-gray-900 mb-4 flex items-center">
+                        <i class="fas fa-pills text-blue-500 mr-3"></i>
+                        Treatment Recommendations
+                    </h2>
+                    
+                    <ul class="space-y-3">
+                        {% for treatment in insights.treatment_recommendations %}
+                        <li class="flex items-start">
+                            <i class="fas fa-check-circle text-blue-500 mt-1 mr-3"></i>
+                            <span class="text-gray-700">{{ treatment }}</span>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Right Column -->
+            <div class="space-y-6">
+                {% if insights.type == 'benign' %}
+                <!-- Follow-up Plan -->
+                <div class="bg-white rounded-xl shadow-sm p-6 border-l-4 border-purple-500">
+                    <h2 class="text-xl font-bold text-gray-900 mb-4 flex items-center">
+                        <i class="fas fa-calendar-alt text-purple-500 mr-3"></i>
+                        Follow-up Plan
+                    </h2>
+                    
+                    <div class="mb-4">
+                        <h3 class="font-semibold text-gray-900">Timeline:</h3>
+                        <p class="text-gray-700">{{ insights.follow_up_plan.timeline }}</p>
+                    </div>
+                    
+                    <div>
+                        <h3 class="font-semibold text-gray-900 mb-2">Recommended Actions:</h3>
+                        <ul class="space-y-2">
+                            {% for action in insights.follow_up_plan.recommendations %}
+                            <li class="flex items-center text-gray-700">
+                                <i class="fas fa-calendar-check text-purple-500 mr-3"></i>
+                                {{ action }}
+                            </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- General Advice -->
+                <div class="bg-white rounded-xl shadow-sm p-6 border-l-4 border-indigo-500">
+                    <h2 class="text-xl font-bold text-gray-900 mb-4 flex items-center">
+                        <i class="fas fa-lightbulb text-indigo-500 mr-3"></i>
+                        General Health Advice
+                    </h2>
+                    
+                    <ul class="space-y-3">
+                        {% for advice in insights.general_advice %}
+                        <li class="flex items-start">
+                            <i class="fas fa-star text-indigo-500 mt-1 mr-3"></i>
+                            <span class="text-gray-700">{{ advice }}</span>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+
+                {% else %}
+                <!-- Prognosis Indicators -->
+                <div class="bg-white rounded-xl shadow-sm p-6 border-l-4 border-green-500">
+                    <h2 class="text-xl font-bold text-gray-900 mb-4 flex items-center">
+                        <i class="fas fa-chart-line text-green-500 mr-3"></i>
+                        Prognosis Indicators
+                    </h2>
+                    
+                    {% if insights.prognosis_indicators.positive_factors %}
+                    <div class="mb-4">
+                        <h3 class="font-semibold text-gray-900 mb-2">Positive Factors:</h3>
+                        <ul class="space-y-2">
+                            {% for factor in insights.prognosis_indicators.positive_factors %}
+                            <li class="flex items-center text-gray-700">
+                                <i class="fas fa-plus-circle text-green-500 mr-3"></i>
+                                {{ factor }}
+                            </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                    {% endif %}
+                    
+                    <div class="p-4 bg-green-50 rounded-lg">
+                        <p class="text-green-800 font-medium">
+                            <i class="fas fa-info-circle mr-2"></i>
+                            {{ insights.prognosis_indicators.recommendation }}
+                        </p>
+                    </div>
+                    
+                    <div class="mt-4 p-4 bg-blue-50 rounded-lg">
+                        <p class="text-blue-800">
+                            <strong>Survival Insight:</strong> {{ insights.prognosis_indicators.survival_message }}
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Next Steps -->
+                <div class="bg-white rounded-xl shadow-sm p-6 border-l-4 border-red-500">
+                    <h2 class="text-xl font-bold text-gray-900 mb-4 flex items-center">
+                        <i class="fas fa-flag text-red-500 mr-3"></i>
+                        Immediate Next Steps
+                    </h2>
+                    
+                    <ul class="space-y-3">
+                        {% for step in insights.next_steps %}
+                        <li class="flex items-start">
+                            <i class="fas fa-arrow-right text-red-500 mt-1 mr-3"></i>
+                            <span class="text-gray-700">{{ step }}</span>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+                {% endif %}
+
+                <!-- Important Notice -->
+                <div class="bg-yellow-50 border border-yellow-200 rounded-xl p-6">
+                    <div class="flex items-start">
+                        <i class="fas fa-exclamation-triangle text-yellow-500 text-xl mt-1 mr-4"></i>
+                        <div>
+                            <h3 class="font-semibold text-yellow-800 mb-2">Important Medical Notice</h3>
+                            <p class="text-yellow-700 text-sm">
+                                This assessment is generated by an AI system and is for educational purposes only. 
+                                It should not replace professional medical advice, diagnosis, or treatment. 
+                                Always consult qualified healthcare providers for medical decisions.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="mt-8 flex flex-col sm:flex-row gap-4 justify-center">
+            <a href="{{ url_for('new_analysis') }}" 
+                class="bg-blue-600 hover:bg-blue-700 text-white px-8 py-4 rounded-lg font-semibold text-lg transition duration-300 transform hover:scale-105 text-center">
+                <i class="fas fa-redo mr-2"></i>Start New Analysis
+            </a>
+            <a href="{{ url_for('index') }}" 
+                class="bg-gray-500 hover:bg-gray-600 text-white px-8 py-4 rounded-lg font-semibold text-lg transition duration-300 text-center">
+                <i class="fas fa-home mr-2"></i>Return to Home
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}
